@@ -12,14 +12,14 @@ char readBlock(NanoFileSystemDisk disk, long offset, void* block){
   fseek(disk, offset*BLOCK_SIZE, SEEK_SET);
   fread(block, sizeof(char)*BLOCK_SIZE, 1, disk);
   rewind(disk);
-  return 1;
+  return 0;
 }
 
 char writeBlock(NanoFileSystemDisk disk, long offset, void* block){
   fseek(disk, offset*BLOCK_SIZE, SEEK_SET);
   fwrite(block, sizeof(char)*BLOCK_SIZE, 1, disk);
   rewind(disk);
-  return 1;
+  return 0;
 }
 
 

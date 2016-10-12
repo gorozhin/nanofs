@@ -1,8 +1,18 @@
-#ifndef _NNOFS_H_
-#define _NNOFS_H_
+#ifndef _NANOFS_H_
+#define _NANOFS_H_
+#include "nanofsglobalsettings.h"
+#include "nanofsdisk.h"
+#include "nanofsblockfreelist.h"
 
-typedef struct NanoFileSystemHeader{
+typedef struct NanoFSINode{
+  char name[MAX_FILENAME];
   
-} NanoFileSystemHeader;
+} NanoFSINode;
+
+typedef struct NanoFSHeader{
+  NanoFSBlockFreeList blockFreeList;
+  // TODO: add more meta to the definition
+} NanoFSHeader;
+
 
 #endif

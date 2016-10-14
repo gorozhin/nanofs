@@ -1,4 +1,4 @@
-#include "nanofsdisk.h"
+#include "disk.h"
 
 NanoFSDisk openDisk(char* name) {
   return fopen(name,"r+b");

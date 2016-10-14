@@ -1,4 +1,3 @@
-
 #include "blockfreelist.h"
 
 long getFirstFreeBlock(NanoFSBlockFreeList freeList);
@@ -12,7 +11,7 @@ long getFirstFreeBlock(NanoFSBlockFreeList freeList){
     for (char j = 0; j < CHAR_BIT; j++){
       char a = (freeList[i] >> j);
       if (!a)
-	return i*256+j;
+	return i*8+j;
     }
   }
   return -1;
@@ -37,15 +36,12 @@ void printFreeBlockList(NanoFSBlockFreeList freeList){
 int main(){
   NanoFSBlockFreeList a;
   for (long i = 0; i < BLOCK_FREE_LIST_DIMENSION; i++) a[i] = 0;
-  allocBlock(a,BLOCKS_COUNT - 1);
-  allocBlock(a, 0);
-
-  printf("%d\n", getFirstFreeBlock(a));
+  for (long i = 0; i < BLOCKS_COUNT - 10; i++) 
+    allocBlock(a,i);
+  printf("%ld\n", getFirstFreeBlock(a));
   /* allocBlock(a,(MAX_DISK_SIZE / BLOCK_SIZE) - 1); */
   printf("%d : %x \n",(BLOCK_FREE_LIST_DIMENSION - 1), (unsigned char)a[BLOCK_FREE_LIST_DIMENSION - 1]);
-  printf("%d : %x \n",(BLOCK_FREE_LIST_DIMENSION), (unsigned char)a[BLOCK_FREE_LIST_DIMENSION]);
-  printf("%d : %x \n",(BLOCK_FREE_LIST_DIMENSION + 1), (unsigned char)a[BLOCK_FREE_LIST_DIMENSION  + 1]);
-
+  
   /* printf("%d\n", a[0] & 1); */
   /* allocBlock(a,0); */
   /* printf("%d\n", a[0] & 1); */

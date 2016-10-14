@@ -1,8 +1,8 @@
 #ifndef _NANOFS_H_
 #define _NANOFS_H_
-#include "nanofsglobalsettings.h"
-#include "nanofsdisk.h"
-#include "nanofsblockfreelist.h"
+#include "globalsettings.h"
+#include "disk.h"
+#include "blockfreelist.h"
 
 typedef struct NanoFSINode{
   char name[MAX_FILENAME];

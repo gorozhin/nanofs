@@ -4,7 +4,7 @@
 #include <limits.h>
 #include <stdio.h>
 
-typedef char NanoFSBlockFreeList[BLOCK_FREE_LIST_DIMENSION];//[BLOCK_FREE_LIST_DIMENSTION];
+typedef char NanoFSBlockFreeList[BLOCK_FREE_LIST_DIMENSION];
 
 long getFirstFreeBlock(NanoFSBlockFreeList freeList);
 void allocBlock(NanoFSBlockFreeList freeList, long offset);

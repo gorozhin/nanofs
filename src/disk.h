@@ -2,6 +2,8 @@
 #define _NNOFS_DISK_H_
 #include <stdio.h>
 #include <stdlib.h>
+#include "globalsettings.h"
+
 
 typedef FILE* NanoFSDisk;
 

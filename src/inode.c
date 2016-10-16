@@ -1,6 +1,4 @@
 #include "inode.h"
-#include "globalsettings.h"
-#include "disk.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -30,16 +28,4 @@ void printINodeDefinedFile(NanoFSDisk disk, inode f){
     for (int j = 0; j < 4096; j++)
       printf("%c", *(char*)(block+j));
   }
-}
-
-int main() {
-  NanoFSDisk disk = openDisk("../tools/burn/file");
-  void* block = malloc(BLOCK_SIZE);
-  readBlock(disk, 0, block);
-  inode i = inodeFromBlock(block);
-  printINode(i);
-  printf("\n\n");
-  printINodeDefinedFile(disk, i);
-  closeDisk(disk);
-  return 0;
 }

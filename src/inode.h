@@ -2,6 +2,7 @@
 #define _INODE_H_
 
 #include "globalsettings.h"
+#include "disk.h"
 
 typedef struct inode {
   char fileName[MAX_FILENAME];

@@ -3,16 +3,32 @@
 
 int main() {
   NanoFSDisk d = openDisk("../tools/burn/file");
-  NanoFSBlockFreeList fbl = readFreeBlockList(d);
-
-  /* void* block = malloc(BLOCK_SIZE); */
-  /* readBlock(d, 0, block); */
+  inodeBitmap fbl = readInodeBitmap(d);
+  NanoFSBlockFreeList fbll = readFreeBlockList(d);
+  long i = 0, offset = 0;
+  for (i = 0; i < INODE_INDEX_MAP_BLOCKSIZE*BLOCK_SIZE; i++) {
+    printf("%x ", (unsigned char) *(fbl+i));
+    offset++;
+  }
   
-  /* for (long i = 0; i < BLOCK_SIZE; i++) */
-  /*   printf("%x ", *(unsigned char*)(block+i)); */
+  printf("\n\n\n");
+  allocInode(fbl, 0);
+  allocInode(fbl, 1);
+  allocInode(fbl, 2);
+  allocInode(fbl, 3);
+  allocInode(fbl, 4);
 
-  for (long i = 0; i < BLOCK_FREE_LIST_BLOCKSIZE*BLOCK_SIZE; i++)
-    printf("%x ", (unsigned char)*(fbl+i));
+  long o = getFirstFreeInode(fbl);
+  long o1 = getFirstFreeBlock(fbll);
 
-  printf("\nHello from nanofs!\n");
+  writeInodeBitmap(d, fbl);
+  i = 0, offset = 0;
+  for (i = 0; i < INODE_INDEX_MAP_BLOCKSIZE*BLOCK_SIZE; i++) {
+    printf("%x ", (unsigned char) *(fbl+i));
+    offset++;
+  }
+
+  printf("\n%ld\n", offset);
+  printf("\n%ld\n", o);
+  printf("\n%ld\n", o1);
 }

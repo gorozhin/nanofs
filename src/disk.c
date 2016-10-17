@@ -22,8 +22,7 @@ char writeBlock(NanoFSDisk disk, long offset, void* block){
   return 0;
 }
 
-
-// NOT for implementation, delete on 
+// TODO: NOT for implementation, delete on release
 void printBlock(void* block){
   for (int i = 0; i < BLOCK_SIZE; i++)
     printf("%02x ", *((unsigned char*)(block+i)));

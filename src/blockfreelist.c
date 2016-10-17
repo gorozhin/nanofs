@@ -8,7 +8,7 @@ long getFirstFreeBlock(NanoFSBlockFreeList freeList){
   for (long i = 0; i < BLOCK_FREE_LIST_DIMENSION; i++){
     if (freeList[i] == ~0) continue;
     for (char j = 0; j < CHAR_BIT; j++){
-      char a = (freeList[i] >> j);
+      char a = ((freeList[i] >> j) &1);
       if (!a)
 	return i*8+j;
     }
@@ -34,7 +34,7 @@ void printFreeBlockList(NanoFSBlockFreeList freeList){
   }
 }
 
-void* readFreeBlockList(NanoFSDisk disk){
+NanoFSBlockFreeList readFreeBlockList(NanoFSDisk disk){
   fseek(disk, 1*BLOCK_SIZE, SEEK_SET);
   void* block = malloc(BLOCK_FREE_LIST_BLOCKSIZE*BLOCK_SIZE);
   fread(block, sizeof(char)*BLOCK_FREE_LIST_BLOCKSIZE*BLOCK_SIZE, 1, disk);
@@ -44,6 +44,6 @@ void* readFreeBlockList(NanoFSDisk disk){
 
 void writeFreeBlockList(NanoFSBlockFreeList l, NanoFSDisk disk){
   fseek(disk, 1*BLOCK_SIZE, SEEK_SET);
-  fwrite(l, sizeof(char)*BLOCK_FREE_LIST_BLOCKSIZE, 1, disk);
+  fwrite(l, sizeof(char)*BLOCK_FREE_LIST_BLOCKSIZE*BLOCK_SIZE, 1, disk);
   rewind(disk);
 }

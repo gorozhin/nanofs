@@ -11,7 +11,7 @@ typedef char* NanoFSBlockFreeList;
 long getFirstFreeBlock(NanoFSBlockFreeList freeList);
 void allocBlock(NanoFSBlockFreeList freeList, long offset);
 void freeBlock(NanoFSBlockFreeList freeList, long offset);
-void* readFreeBlockList(NanoFSDisk disk);
+NanoFSBlockFreeList readFreeBlockList(NanoFSDisk disk);
 void writeFreeBlockList(NanoFSBlockFreeList l, NanoFSDisk disk);
 
 #endif

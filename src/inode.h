@@ -7,6 +7,7 @@ typedef char* inodeBitmap;
 
 typedef struct inode {
   char fileName[MAX_FILENAME];
+  unsigned long size;
   unsigned long offset[64];
 } inode;
 
@@ -20,6 +21,7 @@ inode inodeFromBlock(void* block);
 void printINode(inode in);
 void printINodeDefinedFile(NanoFSDisk disk, inode f);
 long getFirstFreeInode(inodeBitmap freeList);
+long inodeOffsetToBlockOffset(long offset);
 
 
 #endif

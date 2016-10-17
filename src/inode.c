@@ -27,6 +27,7 @@ void printINodeDefinedFile(NanoFSDisk disk, inode f){
 
     for (int j = 0; j < 4096; j++)
       printf("%c", *(char*)(block+j));
+    free(block);
   }
 }
 
@@ -68,4 +69,8 @@ long getFirstFreeInode(inodeBitmap freeList){
     }
   }
   return -1;
+}
+
+long inodeOffsetToBlockOffset(long offset){
+  return offset + INODE_INDEX_MAP_BLOCKSIZE + BLOCK_FREE_LIST_BLOCKSIZE;
 }

@@ -6,10 +6,18 @@
 #include "inode.h"
 
 typedef struct NanoFS {
-
+  
   NanoFSBlockFreeList blockFreeList;
   inodeBitmap inodeBitmap;
-
+  NanoFSDisk disk;
+  
 } NanoFS;
+
+
+NanoFS mountNanoFS(NanoFSDisk d);
+void unmountNanoFS(NanoFS fs);
+void syncNanoFS(NanoFS fs);
+long newFile(char name[MAX_FILENAME], NanoFS fs);
+
 
 #endif

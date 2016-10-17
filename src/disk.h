@@ -28,5 +28,5 @@ char readBlock(NanoFSDisk disk, long offset, void* block);
   Return 0 if everything is Ok, or a non-zero error code
 */
 char writeBlock(NanoFSDisk disk, long offset, void* block);
-
+void printBlock(void* block);
 #endif //_NNOFS_DISK_H_

@@ -35,14 +35,14 @@ void printINodeDefinedFile(NanoFSDisk disk, inode f){
 //inode bitmap part
 inodeBitmap readInodeBitmap(NanoFSDisk disk){
   inodeBitmap inbm = malloc(INODE_INDEX_MAP_BLOCKSIZE*BLOCK_SIZE);
-  fseek(disk, (1+BLOCK_FREE_LIST_BLOCKSIZE-1)*BLOCK_SIZE, SEEK_SET);
+  fseek(disk, (BLOCK_FREE_LIST_BLOCKSIZE+1)*BLOCK_SIZE, SEEK_SET);
   fread(inbm, sizeof(char)*BLOCK_SIZE*INODE_INDEX_MAP_BLOCKSIZE, 1, disk);
   rewind(disk);
   return inbm;
 }
 
 void writeInodeBitmap(NanoFSDisk disk, inodeBitmap bitmap){
-  fseek(disk, (1+BLOCK_FREE_LIST_BLOCKSIZE-1)*BLOCK_SIZE, SEEK_SET);
+  fseek(disk, (BLOCK_FREE_LIST_BLOCKSIZE+1)*BLOCK_SIZE, SEEK_SET);
   fwrite(bitmap, sizeof(char)*BLOCK_SIZE*INODE_INDEX_MAP_BLOCKSIZE, 1, disk);
   rewind(disk);
 }
@@ -63,7 +63,7 @@ long getFirstFreeInode(inodeBitmap freeList){
   for (long i = 0; i < INODE_INDEX_MAP_DIMENSION; i++){
     if (freeList[i] == ~0) continue;
     for (char j = 0; j < CHAR_BIT; j++){
-      char a = ((freeList[i] >> j)&1);
+      char a = ((freeList[i] >> j) & 1);
       if (!a)
 	return i*8+j;
     }
@@ -72,5 +72,5 @@ long getFirstFreeInode(inodeBitmap freeList){
 }
 
 long inodeOffsetToBlockOffset(long offset){
-  return offset + INODE_INDEX_MAP_BLOCKSIZE + BLOCK_FREE_LIST_BLOCKSIZE;
+  return offset + INODE_INDEX_MAP_BLOCKSIZE + BLOCK_FREE_LIST_BLOCKSIZE + 1;
 }

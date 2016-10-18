@@ -18,6 +18,7 @@ NanoFS mountNanoFS(NanoFSDisk d);
 void unmountNanoFS(NanoFS fs);
 void syncNanoFS(NanoFS fs);
 long newFile(char name[MAX_FILENAME], NanoFS fs);
+char fileExists(char name[MAX_FILENAME], NanoFS fs);
 
 
 #endif

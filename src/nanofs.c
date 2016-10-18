@@ -1,19 +1,19 @@
 #include "nanofs.h"
 #include <stdio.h>
+#include <string.h>  
+
 //~/Developer/c/dvfu/nanofs/src/
 int main() {
   NanoFSDisk d = openDisk("../tools/burn/file");
-  /* void* block = malloc(sizeof(char)*BLOCK_SIZE); */
-  /* for(long i = 0; i < BLOCK_SIZE; i++){ */
-  /*   *(char*)(block+i) = 0x41; */
-  /* } */
-
-  
-  /* writeBlock(d, 101, block); */
-
   NanoFS fs = mountNanoFS(d);
+  
   long ioffset = newFile("abcdef", fs);
+  if (ioffset < 0) return 1;
+  printf("IOFFSET:%ld\n", ioffset);
+  
   long offset = inodeOffsetToBlockOffset(ioffset);
+  printf("OFFSET:%ld\n", offset);
+
   void* block = malloc(sizeof(char)*BLOCK_SIZE);
   readBlock(fs.disk, offset, block);
   inode ind = inodeFromBlock(block);
@@ -29,6 +29,11 @@ int main() {
 
   free(block);
   free(block1);
+    
+  printf("\n%d\n",fileExists("asdf", fs));
+  printf("\n%d\n",fileExists("abcdef", fs));
+  
+  syncNanoFS(fs);
   unmountNanoFS(fs);
   fclose(d);
 }
@@ -53,7 +58,28 @@ void syncNanoFS(NanoFS fs){
   writeFreeBlockList(fs.blockFreeList, fs.disk);
 }
 
+char fileExists(char name[MAX_FILENAME], NanoFS fs){
+  inodeBitmap inbm = fs.inodeBitmap;
+  for (long i = 0; i < INODE_INDEX_MAP_DIMENSION; i++){
+    for (char j = 0; j < CHAR_BIT; j++){
+      if((inbm[i] >> j) & 1) {
+	void* block = malloc(sizeof(char) * BLOCK_SIZE);
+	readBlock(fs.disk, inodeOffsetToBlockOffset(i*8+j), block);
+	inode ind = inodeFromBlock(block);
+	if (strcmp(ind.fileName, name) == 0){
+	  return 1;
+	}
+      }
+    }
+  }
+  return 0;
+}
+
+
+
 long newFile(char name[MAX_FILENAME], NanoFS fs){
+  if (fileExists(name, fs)) return -1;
+  
   void* block = malloc(sizeof(char)*BLOCK_SIZE);
   for(long i = 0; i < BLOCK_SIZE; i++){
     *(char*)(block+i) = 0;
@@ -77,11 +103,10 @@ long newFile(char name[MAX_FILENAME], NanoFS fs){
   
   newInode->offset[0] = firstBlockIndex;
 
-  
   long placeToWrtie = inodeOffsetToBlockOffset(inodeIndex);
-  writeBlock(fs.disk,placeToWrtie, block);
+  writeBlock(fs.disk, placeToWrtie, block);
  
   syncNanoFS(fs);
   free(block);
-  return 0;
+  return placeToWrtie;
 }

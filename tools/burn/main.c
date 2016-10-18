@@ -1,101 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "../../src/disk.h"
 
 // bytes to write, 1GB
 #define N 1073741824
 
 void burn(FILE* f){
   long offset = 0;
-  
-  for(long int i = offset; i < 4096; i++){
-    fputc(0, f);offset++;
-  }
-  
-  for(long int i = 0; i < 16; i++){
-    fputc(0xff, f);offset++;
-  }
-
-  for(long int i = 0; i < 16; i++){
-    fputc(0xff, f);offset++;
-  }
-  
-  fputc(0x9, f); offset++;
-  
-  for(long int i = 0; i < 8*4096-17; i++){
+  for (long i = offset; i < BLOCK_SIZE; i++){
     fputc(0x0, f);offset++;
   }
   
-  for(long int i = offset; i < N; i++){
-    fputc(0, f);offset++;
+  for (long i = offset; i < PROTECTED_BLOCKS / 8; i++){
+    fputc(0xff, f);offset++;
   }
-  /* long offset = 0; */
-  /* unsigned char toWrite = 1; */
+  fputc(PROTECTED_BLOCKS % 8, f);offset++;
+
+  for (long i = offset; i < BLOCK_SIZE - (PROTECTED_BLOCKS / 8 + 1); i++){
+    fputc(0x00, f);offset++;
+  }
   
-  /* fputc(0x42, f);offset++; */
-  /* fputc(0x43, f);offset++; */
-  /* fputc(0x44, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-
-  /* fputc(0x1, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-
-  /* fputc(0x2, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-  /* fputc(0x0, f);offset++; */
-
-
-  /* for(long int i = 0; i < 62; i++){ */
-  /*     fputc(0x0, f);offset++; */
-  /*     fputc(0x0, f);offset++; */
-  /*     fputc(0x0, f);offset++; */
-  /*     fputc(0x0, f);offset++; */
-  /*     fputc(0x0, f);offset++; */
-  /*     fputc(0x0, f);offset++; */
-  /*     fputc(0x0, f);offset++; */
-  /* } */
-  /* for (long int i = offset; i < 4096; i++){ */
-  /*   fputc(0x0, f);offset++; */
-  /* } */
-
-  /* toWrite = 0x41; */
-  /* for (long int i = offset, j = offset+4096; i < j; i++){ */
-  /*   fputc(toWrite, f); */
-  /*   toWrite++; */
-  /*   offset++; */
-  /*   (toWrite > 0x5a) ? toWrite = 0x41: 1; */
-  /* } */
-
-  /* for (long int i = offset, j = offset+1096; i < j; i++){ */
-  /*   fputc(0x41, f); */
-  /*   offset++; */
-  /* } */
-
-  /* for (long int i = offset, j = offset+3000; i < j; i++){ */
-  /*   fputc(0x0, f); */
-  /*   offset++; */
-  /* } */
+  for (long i = offset; i < N; i++){
+    fputc(0x00, f);offset++;
+  }				   
   
-  /* for (long int i = offset; i < N; i++){ */
-  /*   fputc(0, f); */
-  /*   /\* fputc(toWrite, f); *\/ */
-  /*   /\* toWrite++; *\/ */
-  /*   /\* if (!toWrite) toWrite = 1; *\/ */
-  /* } */
 }
 
 void read(FILE* f){

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>  
 
-//~/Developer/c/dvfu/nanofs/src/
 int main() {
   NanoFSDisk d = openDisk("../tools/burn/file");
   NanoFS fs = mountNanoFS(d);

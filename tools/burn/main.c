@@ -1,29 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../../src/disk.h"
+#include "../../src/nanofs.h"
+#include "../../src/blockfreelist.h"
+#include "../../src/inode.h"
 
 // bytes to write, 1GB
 #define N 1073741824
 
 void burn(FILE* f){
-  long offset = 0;
-  for (long i = offset; i < BLOCK_SIZE; i++){
-    fputc(0x0, f);offset++;
+  for (long i = 0; i < N; i++){
+    fputc(0x00, f);
   }
-  
-  for (long i = offset; i < PROTECTED_BLOCKS / 8; i++){
-    fputc(0xff, f);offset++;
+  NanoFSBlockFreeList fbl = readFreeBlockList(f);
+  for (long i = 0; i < PROTECTED_BLOCKS; i++){
+    allocBlock(fbl, i);
   }
-  fputc(PROTECTED_BLOCKS % 8, f);offset++;
-
-  for (long i = offset; i < BLOCK_SIZE - (PROTECTED_BLOCKS / 8 + 1); i++){
-    fputc(0x00, f);offset++;
-  }
-  
-  for (long i = offset; i < N; i++){
-    fputc(0x00, f);offset++;
-  }				   
-  
+  writeFreeBlockList(fbl, f);
 }
 
 void read(FILE* f){

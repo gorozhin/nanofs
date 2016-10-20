@@ -5,32 +5,25 @@
 
 void printINode(inode in){
   printf("%s\n", in.fileName);
+  printf("%ld\n", in.size);
   for (int i = 0; i < 64; i++) {
-    printf("%lx\n", (unsigned long)in.offset[i]);
+    if (!(unsigned long)in.offset[i]) break;
+    printf("%ld\n", (unsigned long)in.offset[i]);
   }
   printf("\n");
 }
 
-inode inodeFromBlock(void* block){
-  return *(inode*)block;
-}
-
 void printINodeDefinedFile(NanoFSDisk disk, inode f){
-  for (int i = 0; i < 64; i++){
-    long offset = f.offset[i];
-    if (offset <= 0){
-      break;
-    }
-
-    void* block = malloc(BLOCK_SIZE);
-    readBlock(disk, offset, block);
-
-    for (int j = 0; j < 4096; j++)
-      printf("%c", *(char*)(block+j));
-    free(block);
+  for (long i = 0; i < f.size; i++){
+    long blocksToSkip = i / BLOCK_SIZE;
+    long byteToPrint = i % BLOCK_SIZE;
+    
+    void* block = malloc(sizeof(char) * BLOCK_SIZE);
+    readBlock(disk, f.offset[blocksToSkip], block);
+    printf("%ld : %02x \n", i, ((unsigned char*)block)[byteToPrint]);
   }
-}
 
+}
 
 //inode bitmap part
 inodeBitmap readInodeBitmap(NanoFSDisk disk){
@@ -72,5 +65,5 @@ long getFirstFreeInode(inodeBitmap freeList){
 }
 
 long inodeOffsetToBlockOffset(long offset){
-  return offset + INODE_INDEX_MAP_BLOCKSIZE + BLOCK_FREE_LIST_BLOCKSIZE + 1;
+  return offset + INODE_INDEX_MAP_BLOCKSIZE + BLOCK_FREE_LIST_BLOCKSIZE +1 ;
 }

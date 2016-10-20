@@ -22,38 +22,8 @@ char writeBlock(NanoFSDisk disk, long offset, void* block){
   return 0;
 }
 
-
-// NOT for implementation, delete on 
+// TODO: NOT for implementation, delete on release
 void printBlock(void* block){
   for (int i = 0; i < BLOCK_SIZE; i++)
     printf("%02x ", *((unsigned char*)(block+i)));
-}
-
-// this is a library file, so main should be deleted from final version,
-// right now this is a testing polygone
-int main(){
-  NanoFSDisk d = openDisk("../tools/burn/file");
-  if (d == NULL){
-    printf("error opening file, please check \"../tools/burn/file\"\n");
-    return 1;
-  }
-  void* block = malloc(BLOCK_SIZE * sizeof(char));
-  void* block1 = malloc(BLOCK_SIZE * sizeof(char));
-  for (int i = 0; i < BLOCK_SIZE; i++)
-    *((unsigned char*)(block1+i)) = i;
-
-  readBlock(d, 0, block);
-  writeBlock(d, 0, block1);
-  readBlock(d, 0, block1);
-  writeBlock(d, 0, block);
-
-  printBlock(block);
-  printf("\n");
-  printBlock(block1);
-  printf("\n");
-  
-  free(block);
-  free(block1);
-  closeDisk(d);
-  return 0;
 }

@@ -6,53 +6,44 @@ int main() {
   NanoFSDisk d = openDisk("../tools/burn/file");
   NanoFS fs = mountNanoFS(d);
   
-  /* long ioffset = newFile("abcde", fs); */
-  /* if (ioffset < 0) ioffset = findFile("abcde", fs); */
-
-  /* for (long i = 0; i < 4096*64; i++) */
-  /*   writeByteToFile(0x41+(i % (0x5a-0x41)), ioffset, fs); */
-
-  /* long offset = inodeOffsetToBlockOffset(ioffset); */
-  /* void* block = malloc(sizeof(char) * BLOCK_SIZE); */
-  /* readBlock(fs.disk, offset, block); */
-  /* inode* ind = (inode*)block; */
-
-  /* printINode(*ind); */
-  /* printINodeDefinedFile(fs.disk, *ind); */
-  
   long ioffset1 = newFile("a1", fs);
-  long ioffset2= newFile("a2", fs);
-
+  if (ioffset1 < 0) 
+    ioffset1 = findFile("a1", fs);
+  
   writeByteToFile(0x41, ioffset1, fs);
   writeByteToFile(0x42, ioffset2, fs);
 
-  long offset = inodeOffsetToBlockOffset(ioffset1);
-  void* block = malloc(sizeof(char) * BLOCK_SIZE);
-  readBlock(fs.disk, offset, block);
-  inode* ind = (inode*)block;
-
-  printf("a1:\n");
-  printINodeDefinedFile(fs.disk, *ind);
-  
-  long offset1 = inodeOffsetToBlockOffset(ioffset2);
+  long offset1 = inodeOffsetToBlockOffset(ioffset1);
   void* block1 = malloc(sizeof(char) * BLOCK_SIZE);
   readBlock(fs.disk, offset1, block1);
   inode* ind1 = (inode*)block1;
 
-  printf("a2:\n");
-  printINodeDefinedFile(fs.disk, *ind1);
+  long offset2 = inodeOffsetToBlockOffset(ioffset2);
+  void* block2 = malloc(sizeof(char) * BLOCK_SIZE);
+  readBlock(fs.disk, offset2, block2);
+  inode* ind2 = (inode*)block2;
   
-  for (long i = 0; i < 4096; i++)
-    writeByteToFile(0x41+(i % (0x5a-0x41)), ioffset1, fs);
-
-  readBlock(fs.disk, offset, block);
-  ind = (inode*)block;
-  printf("a1:\n");
-  printINodeDefinedFile(fs.disk, *ind);
-  printf("a2:\n"); 
+  printINode(*ind1);
   printINodeDefinedFile(fs.disk, *ind1);
 
+  printINode(*ind2);
+  printINodeDefinedFile(fs.disk, *ind2);
 
+  for(long i = 0; i < 4096; i++){
+    writeByteToFile(0x41 + (i % (0x5a - 0x41)), ioffset1, fs);
+  }
+
+  readBlock(fs.disk, offset1, block1);
+  ind1 = (inode*)block1;
+
+  printINode(*ind1);
+  printINodeDefinedFile(fs.disk, *ind1);
+
+  printINode(*ind2);
+  printINodeDefinedFile(fs.disk, *ind2);
+  
+  free(block1);
+  free(block2);
   unmountNanoFS(fs);
   fclose(d);
 }
@@ -90,8 +81,10 @@ long findFile(char name[MAX_FILENAME], NanoFS fs){
 	readBlock(fs.disk, inodeOffsetToBlockOffset(i*8+j), block);
 	inode* ind = (inode*)block;
 	if (strcmp(ind->fileName, name) == 0){
+	  free(block);
 	  return (i*8+j);
 	}
+	free(block);
       }
     }
   }
@@ -101,22 +94,28 @@ long findFile(char name[MAX_FILENAME], NanoFS fs){
 void growFile(long fileDescriptor, NanoFS fs){
   long offset = inodeOffsetToBlockOffset(fileDescriptor);
   void* block = malloc(sizeof(char) * BLOCK_SIZE);
+  
   readBlock(fs.disk, offset, block);
   inode* ind = (inode*)block;
-
+    
   for (int i = 0; i < 64; i++){
     if(ind->offset[i] == 0){
       long firstFreeBlock = getFirstFreeBlock(fs.blockFreeList);
-      printf("firstFreeBlock: %ld\n", firstFreeBlock);
-      if (firstFreeBlock < 0) return;
+      //printf("firstFreeBlock: %ld\n", firstFreeBlock);
+      if (firstFreeBlock < 0) {
+	free(block);
+	return;
+      }
       allocBlock(fs.blockFreeList, firstFreeBlock);
       ind->offset[i] = firstFreeBlock;
       break;
     }
   }
 
+
   writeBlock(fs.disk, offset, block);
   syncNanoFS(fs);
+  free(block);
 }
 
 void shrinkFile(long fileDescriptor, NanoFS fs){
@@ -203,7 +202,7 @@ void writeByteToFile(char byte, long fileDescriptor, NanoFS fs) {
   ind->size = ind->size + 1;
 
   writeBlock(fs.disk, offset, block);
-
+  
   void* block1 = malloc(sizeof(char) * BLOCK_SIZE);
   readBlock(fs.disk, ind->offset[blockToWrite], block1);
   *(char*)(block1+byteToWrite) = byte;

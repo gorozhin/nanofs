@@ -4,8 +4,9 @@
 #include <stdlib.h>
 
 void printINode(inode in){
-  printf("%s\n", in.fileName);
-  printf("%ld\n", in.size);
+  printf("filename: %s\n", in.fileName);
+  printf("size: %ld\n", in.size);
+  printf("offsets: \n"); 
   for (int i = 0; i < 64; i++) {
     if (!(unsigned long)in.offset[i]) break;
     printf("%ld\n", (unsigned long)in.offset[i]);

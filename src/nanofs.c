@@ -9,6 +9,10 @@ int main() {
   long ioffset1 = newFile("a1", fs);
   if (ioffset1 < 0) 
     ioffset1 = findFile("a1", fs);
+
+  long ioffset2 = newFile("a2", fs);
+  if (ioffset2 < 0) 
+    ioffset2 = findFile("a2", fs);
   
   writeByteToFile(0x41, ioffset1, fs);
   writeByteToFile(0x42, ioffset2, fs);
@@ -17,30 +21,28 @@ int main() {
   void* block1 = malloc(sizeof(char) * BLOCK_SIZE);
   readBlock(fs.disk, offset1, block1);
   inode* ind1 = (inode*)block1;
-
+  
   long offset2 = inodeOffsetToBlockOffset(ioffset2);
   void* block2 = malloc(sizeof(char) * BLOCK_SIZE);
   readBlock(fs.disk, offset2, block2);
+  printf("\n");
+  
   inode* ind2 = (inode*)block2;
   
-  printINode(*ind1);
-  printINodeDefinedFile(fs.disk, *ind1);
-
-  printINode(*ind2);
-  printINodeDefinedFile(fs.disk, *ind2);
-
   for(long i = 0; i < 4096; i++){
     writeByteToFile(0x41 + (i % (0x5a - 0x41)), ioffset1, fs);
   }
 
-  readBlock(fs.disk, offset1, block1);
+    for(long i = 0; i < 4096; i++){
+    writeByteToFile(0x41 + (i % (0x5a - 0x41)), ioffset2, fs);
+  }
+
+  
   ind1 = (inode*)block1;
 
   printINode(*ind1);
-  printINodeDefinedFile(fs.disk, *ind1);
 
   printINode(*ind2);
-  printINodeDefinedFile(fs.disk, *ind2);
   
   free(block1);
   free(block2);
@@ -49,13 +51,13 @@ int main() {
 }
 
 NanoFS mountNanoFS(NanoFSDisk d){
-  NanoFS r;
+  NanoFS fs;
 
-  r.disk = d;
-  r.inodeBitmap = readInodeBitmap(d);
-  r.blockFreeList = readFreeBlockList(d);
+  fs.disk = d;
+  fs.inodeBitmap = readInodeBitmap(d);
+  fs.blockFreeList = readFreeBlockList(d);
   
-  return r;
+  return fs;
 }
 
 void unmountNanoFS(NanoFS fs){
@@ -101,7 +103,6 @@ void growFile(long fileDescriptor, NanoFS fs){
   for (int i = 0; i < 64; i++){
     if(ind->offset[i] == 0){
       long firstFreeBlock = getFirstFreeBlock(fs.blockFreeList);
-      //printf("firstFreeBlock: %ld\n", firstFreeBlock);
       if (firstFreeBlock < 0) {
 	free(block);
 	return;
@@ -124,12 +125,13 @@ void shrinkFile(long fileDescriptor, NanoFS fs){
   readBlock(fs.disk, ioffset, block);
   inode* ind = (inode*)block;
   for (int i = 63; i > 0; i--){
-    if(ind->offset[i] != 0){
+    if (ind->offset[i] != 0) {
       freeBlock(fs.blockFreeList, ind->offset[i]);
       ind->offset[i] = 0;
       break;
     }
   }
+  free(block);
   writeBlock(fs.disk, ioffset, block);
   syncNanoFS(fs);
 }
@@ -147,6 +149,7 @@ void deleteFile(char name[MAX_FILENAME], NanoFS fs){
   }
   writeBlock(fs.disk, offset, block);
   freeInode(fs.inodeBitmap, ioffset);
+  free(block);
   syncNanoFS(fs);
 }
 
@@ -191,9 +194,11 @@ void writeByteToFile(char byte, long fileDescriptor, NanoFS fs) {
   long blockToWrite = (ind->size / BLOCK_SIZE);
   long byteToWrite = (ind->size % BLOCK_SIZE);
   
-  if (blockToWrite > 63)
+  if (blockToWrite > 63){
+    free(block);
     return;
-
+  }
+  
   if (!ind->offset[blockToWrite]){
     growFile(fileDescriptor, fs);
     readBlock(fs.disk, offset, block);

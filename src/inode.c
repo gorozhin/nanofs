@@ -22,8 +22,8 @@ void printINodeDefinedFile(NanoFSDisk disk, inode f){
     void* block = malloc(sizeof(char) * BLOCK_SIZE);
     readBlock(disk, f.offset[blocksToSkip], block);
     printf("%ld : %02x \n", i, ((unsigned char*)block)[byteToPrint]);
+    free(block);
   }
-
 }
 
 //inode bitmap part

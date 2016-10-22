@@ -1,9 +1,5 @@
 #include "blockfreelist.h"
 
-long getFirstFreeBlock(NanoFSBlockFreeList freeList);
-void allocBlock(NanoFSBlockFreeList freeList, long offset);
-void freeBlock(NanoFSBlockFreeList freeList, long offset);
-
 long getFirstFreeBlock(NanoFSBlockFreeList freeList){
   for (long i = 0; i < BLOCK_FREE_LIST_DIMENSION; i++){
     if (freeList[i] == ~0) continue;

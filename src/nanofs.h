@@ -26,5 +26,6 @@ void growFile(long fileDescriptor, NanoFS fs);
 void shrinkFile(long fileDescriptor, NanoFS fs);
 
 void writeByteToFile(char byte, long fileDescriptor, NanoFS fs);
+void listFiles(NanoFS fs);
 
 #endif

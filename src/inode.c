@@ -58,8 +58,10 @@ long getFirstFreeInode(inodeBitmap freeList){
     if (freeList[i] == ~0) continue;
     for (char j = 0; j < CHAR_BIT; j++){
       char a = ((freeList[i] >> j) & 1);
-      if (!a)
+      if (!a) {
+	if (i*8+j >= INODE_COUNT) return -1;
 	return i*8+j;
+      }
     }
   }
   return -1;

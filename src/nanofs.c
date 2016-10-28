@@ -5,47 +5,50 @@
 int main() {
   NanoFSDisk d = openDisk("../tools/burn/file");
   NanoFS fs = mountNanoFS(d);
-  
-  long ioffset1 = newFile("a1", fs);
-  if (ioffset1 < 0) 
-    ioffset1 = findFile("a1", fs);
 
-  long ioffset2 = newFile("a2", fs);
-  if (ioffset2 < 0) 
-    ioffset2 = findFile("a2", fs);
-  
-  writeByteToFile(0x41, ioffset1, fs);
-  writeByteToFile(0x42, ioffset2, fs);
+  printf("INODE_COUNT: %llu\n", INODE_COUNT);
+  printf("INODE_COUNT_IDEAL: %llu\n", INODE_COUNT_IDEAL);
 
-  long offset1 = inodeOffsetToBlockOffset(ioffset1);
-  void* block1 = malloc(sizeof(char) * BLOCK_SIZE);
-  readBlock(fs.disk, offset1, block1);
-  inode* ind1 = (inode*)block1;
-  
-  long offset2 = inodeOffsetToBlockOffset(ioffset2);
-  void* block2 = malloc(sizeof(char) * BLOCK_SIZE);
-  readBlock(fs.disk, offset2, block2);
-  printf("\n");
-  
-  inode* ind2 = (inode*)block2;
-  
-  for(long i = 0; i < 4096; i++){
-    writeByteToFile(0x41 + (i % (0x5a - 0x41)), ioffset1, fs);
+  for (int i = 0; i < INODE_COUNT; i++){
+    char s[MAX_FILENAME];
+    s[0] = 'a';
+    s[1] = '0' + (i / 10000) % 10;
+    s[2] = '0' + (i / 1000) % 10;
+    s[3] = '0' + (i / 100) % 10;
+    s[4] = '0' + (i / 10) % 10;
+    s[5] = '0' + i % 10;
+    s[6] = '\0';
+
+    long ioffset = newFile(s, fs);
+    if (ioffset < 0) 
+      ioffset = findFile(s, fs);
+    if (ioffset < 0) break;
+    writeByteToFile(0x41, ioffset, fs);
+    long offset = inodeOffsetToBlockOffset(ioffset);
+    void* block = malloc(sizeof(char) * BLOCK_SIZE);
+    readBlock(fs.disk, offset, block);
+    inode* ind = (inode*)block;
+    printf("%s : %ld %ld\n",ind->fileName, ioffset, offset);
+    free(block);
   }
-
-    for(long i = 0; i < 4096; i++){
-    writeByteToFile(0x41 + (i % (0x5a - 0x41)), ioffset2, fs);
+  printf("");
+  long ioffset = 1;
+  long i = 10000;
+  do {
+    char s[MAX_FILENAME];
+    s[0] = 'a';
+    s[1] = '0' + (i / 10000) % 10;
+    s[2] = '0' + (i / 1000) % 10;
+    s[3] = '0' + (i / 100) % 10;
+    s[4] = '0' + (i / 10) % 10;
+    s[5] = '0' + i % 10;
+    s[6] = '\0';
+    i++;
+    ioffset = newFile(s, fs);
+    printf("%ld\n", ioffset);
   }
-
-  
-  ind1 = (inode*)block1;
-
-  printINode(*ind1);
-
-  printINode(*ind2);
-  
-  free(block1);
-  free(block2);
+  while(ioffset > 0);
+  /* listFiles(fs); */
   unmountNanoFS(fs);
   fclose(d);
 }
@@ -215,4 +218,20 @@ void writeByteToFile(char byte, long fileDescriptor, NanoFS fs) {
   
   free(block);
   free(block1);
+}
+
+
+void listFiles(NanoFS fs){
+  for (uint64_t i = 0; i < INODE_COUNT; i++){
+    for (uint64_t j = 0; j < 8; j++){
+      if ((fs.inodeBitmap[i] >> j)  & 1) {
+	void* block = malloc(sizeof(char) * BLOCK_SIZE);
+	long offset = inodeOffsetToBlockOffset(i*8+j);
+	readBlock(fs.disk, offset, block);
+	inode* ind = (inode*)block;
+	printf("%s\n", ind->fileName);
+
+      }
+    }
+  }
 }
